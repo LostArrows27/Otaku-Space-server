@@ -43,6 +43,24 @@ class DbService {
         }
     }
 
+    async uploadProductNew({productName,productPrice, productFigure,productCategory ,productSale, ownerName, ...image}) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                var arrImage = Object.values(image);
+                const query = `INSERT INTO shopee_database.products
+                (product_name, owner_name,sale_percent,price,left_amount,sold_amount,category,liked_count,main_image,sub_image1,sub_image2,sub_image3,sub_image4)
+                VALUES (? , ?, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?)`
+                connection.query(query, [productName, ownerName, productSale, productPrice, productFigure, productCategory, ...arrImage], (err, result) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     async getRandomProduct(amount) {
         try {
             console.log('Getting ' + amount + ' random products');
@@ -72,6 +90,22 @@ class DbService {
                 GROUP BY owner_name) AS y ON y.shop_name = x.owner_name) AS z
                 ON us.user_name = z.owner_name`;
                 connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getProductID(name) {
+        try {
+            console.log(`Getting product information with name: ${name}`);
+            const response = await new Promise((resolve, reject) => {
+                const query = `SELECT product_id FROM products WHERE product_name = ?`;
+                connection.query(query,[name],(err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
                 })

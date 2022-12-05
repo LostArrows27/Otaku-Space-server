@@ -51,6 +51,7 @@ app.post('/signup', (request, response) => {
 app.post('/signin', (request, response) => {
     const db = dbService.getDbServiceInstance();
     const result = db.signIn(request.body)
+    see(request.body)
     result.then(data => {
         if (data.length == 1) {
             var db2 = dbService.getDbServiceInstance();
@@ -97,6 +98,19 @@ app.get('/updateProductLike/:id/:like', (request, response) => {
     const db = dbService.getDbServiceInstance();
     const result = db.updateProductLike(id, like);
     result.then(data => response.json(data))
+        .catch(err => console.log(err))
+})
+
+// Upload Product
+app.post('/new-product', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    see(request.body);
+    const result = db.uploadProductNew(request.body);
+    result.then(data => {
+        const db = dbService.getDbServiceInstance();
+        const result = db.getProductID(request.body.productName);
+        result.then(data2 => response.json(data2));
+    })
         .catch(err => console.log(err))
 })
 
