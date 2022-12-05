@@ -213,6 +213,23 @@ class DbService {
         }
     }
 
+    async updateProductLike(id, like) {
+        try {
+            console.log('Update product like with id ' + id);
+            const response = await new Promise((resolve, reject) => {
+                const query = "UPDATE products SET liked_count = ? WHERE product_id = ?;"
+                connection.query(query, [like, id], (err, result) => {
+                    if (err) reject(new Error(err.message))
+                    // console.log(result);
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     async insertNewName(name) {
         try {
             const dateAdded = new Date();

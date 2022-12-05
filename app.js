@@ -91,6 +91,15 @@ app.get('/userCart/:id', (request, response) => {
         .catch(err => console.log(err))
 })
 
+// Update product liked count
+app.get('/updateProductLike/:id/:like', (request, response) => {
+    const {id, like } = request.params;
+    const db = dbService.getDbServiceInstance();
+    const result = db.updateProductLike(id, like);
+    result.then(data => response.json(data))
+        .catch(err => console.log(err))
+})
+
 // Add new product to cart
 app.get('/addToCart/:productID/:userID/:amount', (request, response) => {
     const { productID, userID, amount } = request.params;
