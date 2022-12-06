@@ -23,13 +23,13 @@ DROP TABLE IF EXISTS `orders`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `orders` (
-  `order_id` int NOT NULL,
+  `order_id` int NOT NULL AUTO_INCREMENT,
   `order_customer_id` varchar(50) DEFAULT NULL,
   `order_date` date DEFAULT NULL,
   PRIMARY KEY (`order_id`),
   KEY `fk_customer_id` (`order_customer_id`),
-  CONSTRAINT `fk_customer_id` FOREIGN KEY (`order_customer_id`) REFERENCES `users` (`user_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `fk_customer_id` FOREIGN KEY (`order_customer_id`) REFERENCES `users` (`user_name`) ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,6 +38,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
+INSERT INTO `orders` VALUES (24,'dungkhoaito3','2022-12-05'),(25,'dungkhoaito3','2022-12-05'),(26,'dungkhoaito3','2022-12-05'),(27,'dungkhoaito3','2022-12-05'),(28,'dungkhoaito3','2022-12-05'),(29,'dungkhoaito3','2022-12-05'),(30,'dungkhoaito1','2022-12-05'),(31,'dungkhoaito3','2022-12-05'),(32,'minhnhat0408','2022-12-05'),(33,'minhnhat0408','2022-12-05'),(34,'minhnhat0408','2022-12-05'),(35,'minhnhat0408','2022-12-05'),(36,'minhnhat0408','2022-12-05'),(37,'minhnhat0408','2022-12-05'),(38,'minhnhat0408','2022-12-05'),(39,'minhnhat0408','2022-12-05'),(40,'minhnhat0408','2022-12-05'),(41,'minhnhat0408','2022-12-05'),(42,'minhnhat0408','2022-12-05'),(43,'dungkhoaito3','2022-12-06'),(44,'dungkhoaito3','2022-12-06');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-04 21:29:44
+-- Dump completed on 2022-12-06 14:51:47

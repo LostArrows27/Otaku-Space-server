@@ -9,6 +9,8 @@ const connection = mysql.createConnection({
     password: process.env.PASSWORD,
     database: process.env.DATABASE,
     port: process.env.DB_PORT,
+    multipleStatements: true,
+    charset: "utf8_general_ci"
 });
 
 connection.connect((err) => {
@@ -110,6 +112,68 @@ class DbService {
                     resolve(result);
                 })
             });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async newOrder(rqBody) {
+        try {
+            var {userID, productID, productCount, buyDate} = rqBody;
+            console.log(`Update receipt information of ${rqBody.userID}`);
+            const response = await new Promise((resolve, reject) => {
+                // console.log(userID, productID, productCount, buyDate);
+                const query = `UPDATE products SET left_amount = left_amount - ?, sold_amount = sold_amount + ? WHERE product_id = ?;INSERT INTO orders (order_customer_id, order_date) VALUES (?, ?);INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),?,?);`
+                connection.query(query,[productCount, productCount, productID, userID, buyDate, productID, productCount],(err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async buyFromCart(rqBody) {
+        try {
+            var {userID, productID, productArr} = rqBody;
+            // console.log(rqBody);
+            const query1 = `DELETE FROM carts WHERE cart_user_id = "${userID}";`
+            const query2 = `INSERT INTO orders (order_customer_id, order_date) VALUES ("${userID}", NOW());`
+            const query3 = productArr.reduce((acc,info) => {
+                var sub_query_main = `UPDATE products SET left_amount = left_amount - ${info.amount}, sold_amount = sold_amount + ${info.amount} WHERE product_id = ${info.productID};`
+                var sub_query = `INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),${info.productID}, ${info.amount});`
+                return acc + sub_query_main + sub_query;
+            },'');
+            const queryAll = query1 + query2 + query3;
+            // console.log(queryAll);
+            const response = await new Promise((resolve, reject) => {
+                connection.query(queryAll,(err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async updateProduct(rqBody) {
+        try {
+            var {userID, productID, productCount, buyDate} = rqBody;
+            console.log(`Update receipt information of ${rqBody.userID}`);
+            const response = await new Promise((resolve, reject) => {
+                console.log(userID, productID, productCount, buyDate);
+                const query2 = `UPDATE products SET left_amount = left_amount - ${productCount} AND sold_amount = sold_amount + ${productCount} WHERE product_id = ${productID};`
+                connection.query(query2,[],(err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            }); 
             return response;
         } catch (error) {
             console.log(error);
@@ -332,6 +396,24 @@ class DbService {
                 const query = "SELECT * FROM names WHERE name = ?;";
 
                 connection.query(query, [name], (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    resolve(results);
+                })
+            });
+
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async searchProductByName(name, userid) {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query1 = `INSERT INTO searchhistory VALUES ('${userid}', '${name}');`;
+                const query2 = `SELECT * FROM products WHERE product_name LIKE '%${name}%';`
+                const query = query1 + query2;
+                connection.query(query, (err, results) => {
                     if (err) reject(new Error(err.message));
                     resolve(results);
                 })

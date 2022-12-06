@@ -63,6 +63,14 @@ app.post('/signin', (request, response) => {
     })
         .catch(err => console.log(err))
 });
+//select;
+// Buy now product receipt update
+app.post('/receipt_data', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    see(request.body)
+    const result = db.newOrder(request.body);
+    result.then(data1 => console.log(data1))
+});
 
 // Get random 15 products at main page
 app.get('/randomProduct/:id', (request, response) => {
@@ -83,6 +91,13 @@ app.get('/productID/:id', (request, response) => {
         .catch(err => console.log(err))
 })
 
+// Get shop 
+app.get('/user_shop/:shop_name', (request, response) => {
+    const { shop_name } = request.params;
+    const db = dbService.getDbServiceInstance();
+    // const result = db.getProductInfo(id);
+    see(shop_name);
+})
 // Get User Cart Info
 app.get('/userCart/:id', (request, response) => {
     const { id } = request.params;
@@ -94,7 +109,7 @@ app.get('/userCart/:id', (request, response) => {
 
 // Update product liked count
 app.get('/updateProductLike/:id/:like', (request, response) => {
-    const {id, like } = request.params;
+    const { id, like } = request.params;
     const db = dbService.getDbServiceInstance();
     const result = db.updateProductLike(id, like);
     result.then(data => response.json(data))
@@ -108,11 +123,22 @@ app.post('/new-product', (request, response) => {
     const result = db.uploadProductNew(request.body);
     result.then(data => {
         const db = dbService.getDbServiceInstance();
-        const result = db.getProductID(request.body.productName);
         result.then(data2 => response.json(data2));
     })
         .catch(err => console.log(err))
 })
+
+// Buy from cart task:
+// Update cart: delete all cart item
+// Update receipt: create new receipt
+// Make all purchase in each product 
+app.post('/buyFromCart', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    see(request.body);
+    const result = db.buyFromCart(request.body);
+    result.then(data1 => response.json(data1))
+})
+
 
 // Add new product to cart
 app.get('/addToCart/:productID/:userID/:amount', (request, response) => {
@@ -122,6 +148,8 @@ app.get('/addToCart/:productID/:userID/:amount', (request, response) => {
     result.then(data => response.json(data))
         .catch(err => console.log(err))
 })
+
+
 
 // Update cart item
 app.get('/updateCart/:productID/:userID/:amount', (request, response) => {
@@ -164,6 +192,8 @@ app.get('/getfile/:id', (request, response) => {
     response.sendFile(__dirname + "\\" + id);
 })
 
+
+// From youtube
 app.get('/search/:name', (request, response) => {
     const { name } = request.params;
     const db = dbService.getDbServiceInstance();
@@ -174,6 +204,17 @@ app.get('/search/:name', (request, response) => {
         .then(data => response.json({ data: data }))
         .catch(err => console.log(err));
 })
+
+app.get('/searchProduct/:name/:userid', (request, response) => {
+    const { name, userid } = request.params;
+    const db = dbService.getDbServiceInstance();
+    const result = db.searchProductByName(name, userid);
+    result
+        .then(data => response.json(data))
+        .catch(err => console.log(err));
+})
+
+
 /*
     By adding /:id in the link: you will have specific page
     for each product ID

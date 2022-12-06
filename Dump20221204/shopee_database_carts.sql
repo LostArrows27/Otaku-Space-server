@@ -39,7 +39,7 @@ CREATE TABLE `carts` (
 
 LOCK TABLES `carts` WRITE;
 /*!40000 ALTER TABLE `carts` DISABLE KEYS */;
-INSERT INTO `carts` VALUES ('210202689',15,4),('210202689',16,4),('210202689',17,1),('210202689',18,6),('210202689',19,8),('210202689',20,1),('210202689',21,2),('210202689',22,3),('dungkhoaito1',17,2),('dungkhoaito1',24,3),('dungkhoaito2',10,2),('dungkhoaito2',11,3),('dungkhoaito2',12,1),('dungkhoaito2',13,1),('dungkhoaito312',11,2),('dungkhoaito312',20,5),('dungkhoaito312',21,2),('dungkhoaito312',22,1),('dungkhoaito312',23,4),('dungkhoaito312',24,1),('dungkhoaito312',25,1);
+INSERT INTO `carts` VALUES ('dungkhoaito1',24,3),('dungkhoaito2',10,2),('dungkhoaito2',11,3),('dungkhoaito2',12,1),('dungkhoaito2',13,1),('dungkhoaito3',26,1),('dungkhoaito312',11,2),('dungkhoaito312',20,5),('dungkhoaito312',21,2),('dungkhoaito312',22,1),('dungkhoaito312',23,4),('dungkhoaito312',24,1),('dungkhoaito312',25,1),('lostarrows27',26,6),('lostarrows27',31,14);
 /*!40000 ALTER TABLE `carts` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-12-04 21:29:44
+-- Dump completed on 2022-12-06 14:51:47

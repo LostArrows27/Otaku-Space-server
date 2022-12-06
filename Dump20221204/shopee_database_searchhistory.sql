@@ -16,31 +16,28 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `purchase`
+-- Table structure for table `searchhistory`
 --
 
-DROP TABLE IF EXISTS `purchase`;
+DROP TABLE IF EXISTS `searchhistory`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `purchase` (
-  `order_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `product_amount` int DEFAULT NULL,
-  PRIMARY KEY (`order_id`,`product_id`),
-  KEY `fk_purchase_product_id` (`product_id`),
-  CONSTRAINT `fk_purchase_order_id` FOREIGN KEY (`order_id`) REFERENCES `orders` (`order_id`) ON UPDATE CASCADE,
-  CONSTRAINT `fk_purchase_product_id` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON UPDATE CASCADE
+CREATE TABLE `searchhistory` (
+  `user_id` varchar(50) NOT NULL,
+  `search_history` varchar(100) NOT NULL,
+  PRIMARY KEY (`user_id`,`search_history`),
+  CONSTRAINT `fk_searchHistory_userID` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_name`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `purchase`
+-- Dumping data for table `searchhistory`
 --
 
-LOCK TABLES `purchase` WRITE;
-/*!40000 ALTER TABLE `purchase` DISABLE KEYS */;
-INSERT INTO `purchase` VALUES (24,1,2),(25,26,4),(26,4,1),(27,10,2),(28,25,10),(29,32,2),(31,2,2),(31,16,5),(31,20,8),(31,22,3),(31,23,11),(31,30,6),(32,12,2),(33,12,4),(34,9,5),(35,19,3),(36,21,3),(37,21,3),(38,18,4),(38,19,3),(38,21,3),(38,22,4),(38,30,2),(39,17,4),(39,20,4),(39,25,5),(39,30,2),(40,24,3),(41,24,3),(42,12,1),(42,13,5),(42,17,4),(42,23,3),(42,25,5),(42,26,10),(43,20,3),(44,16,3);
-/*!40000 ALTER TABLE `purchase` ENABLE KEYS */;
+LOCK TABLES `searchhistory` WRITE;
+/*!40000 ALTER TABLE `searchhistory` DISABLE KEYS */;
+INSERT INTO `searchhistory` VALUES ('dungkhoaito3','Thiên sứ nhà bên');
+/*!40000 ALTER TABLE `searchhistory` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
