@@ -45,13 +45,13 @@ class DbService {
         }
     }
 
-    async uploadProductNew({productName,productPrice, productFigure,productCategory ,productSale, ownerName, ...image}) {
+    async uploadProductNew({ productName, productPrice, productFigure, productCategory, productSale, ownerName, ...image }) {
         try {
             const response = await new Promise((resolve, reject) => {
                 var arrImage = Object.values(image);
                 const query = `INSERT INTO shopee_database.products
                 (product_name, owner_name,sale_percent,price,left_amount,sold_amount,category,liked_count,main_image,sub_image1,sub_image2,sub_image3,sub_image4)
-                VALUES (? , ?, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?)`
+                VALUES (? , ?, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?); SELECT  LAST_INSERT_ID() AS id, sale_percent FROM products WHERE product_id = LAST_INSERT_ID()`
                 connection.query(query, [productName, ownerName, productSale, productPrice, productFigure, productCategory, ...arrImage], (err, result) => {
                     if (err) reject(new Error(err.message));
                     resolve(result);
@@ -107,7 +107,7 @@ class DbService {
             console.log(`Getting product information with name: ${name}`);
             const response = await new Promise((resolve, reject) => {
                 const query = `SELECT product_id FROM products WHERE product_name = ?`;
-                connection.query(query,[name],(err, result) => {
+                connection.query(query, [name], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
                 })
@@ -118,19 +118,73 @@ class DbService {
         }
     }
 
-    async newOrder(rqBody) {
+
+    async getUserSearchHistory(userID) {
         try {
-            var {userID, productID, productCount, buyDate} = rqBody;
-            console.log(`Update receipt information of ${rqBody.userID}`);
+            console.log(`Getting user ${userID}'s search history`);
             const response = await new Promise((resolve, reject) => {
-                // console.log(userID, productID, productCount, buyDate);
-                const query = `UPDATE products SET left_amount = left_amount - ?, sold_amount = sold_amount + ? WHERE product_id = ?;INSERT INTO orders (order_customer_id, order_date) VALUES (?, ?);INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),?,?);`
-                connection.query(query,[productCount, productCount, productID, userID, buyDate, productID, productCount],(err, result) => {
+                const query = `SELECT search_history FROM searchhistory WHERE user_id = ?`;
+                connection.query(query, [userID], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
                 })
             });
-            
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getShopInfo(shop_name) {
+        try {
+            console.log(`Getting shop information with shop_name ${shop_name}`);
+
+            const response = await new Promise((resolve, reject) => {
+                const query = `SELECT u.user_nickName,u.image_profile,(SELECT SUM(p.sold_amount) FROM products p WHERE p.owner_name = ? ) as sold_amount FROM users u WHERE u.user_name = ?;
+                SELECT p.* FROM shopee_database.products p WHERE p.owner_name = ? AND p.product_name IS NOT NULL;`;
+                connection.query(query, [shop_name, shop_name, shop_name], (err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+    async getAllUserOrder(userid) {
+        try {
+            console.log(`Get Order information ${userid}`);
+            const response = await new Promise((resolve, reject) => {
+                const query = `SELECT p.*, o.order_date, pro.price, pro.product_name, pro.sale_percent, pro.main_image, pro.category FROM purchase p JOIN orders o ON p.order_id = o.order_id AND order_customer_id = ?
+                JOIN products pro ON pro.product_id = p.product_id;`;
+                connection.query(query, [userid],(err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+
+    async newOrder(rqBody) {
+        try {
+            var { userID, productID, productCount, buyDate } = rqBody;
+            console.log(`Update receipt information of ${rqBody.userID}`);
+            const response = await new Promise((resolve, reject) => {
+                // console.log(userID, productID, productCount, buyDate);
+                const query = `UPDATE products SET left_amount = left_amount - ?, sold_amount = sold_amount + ? WHERE product_id = ?;INSERT INTO orders (order_customer_id, order_date) VALUES (?, ?);INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),?,?);`
+                connection.query(query, [productCount, productCount, productID, userID, buyDate, productID, productCount], (err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+
             return response;
         } catch (error) {
             console.log(error);
@@ -139,19 +193,19 @@ class DbService {
 
     async buyFromCart(rqBody) {
         try {
-            var {userID, productID, productArr} = rqBody;
+            var { userID, productID, productArr } = rqBody;
             // console.log(rqBody);
             const query1 = `DELETE FROM carts WHERE cart_user_id = "${userID}";`
             const query2 = `INSERT INTO orders (order_customer_id, order_date) VALUES ("${userID}", NOW());`
-            const query3 = productArr.reduce((acc,info) => {
+            const query3 = productArr.reduce((acc, info) => {
                 var sub_query_main = `UPDATE products SET left_amount = left_amount - ${info.amount}, sold_amount = sold_amount + ${info.amount} WHERE product_id = ${info.productID};`
                 var sub_query = `INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),${info.productID}, ${info.amount});`
                 return acc + sub_query_main + sub_query;
-            },'');
+            }, '');
             const queryAll = query1 + query2 + query3;
             // console.log(queryAll);
             const response = await new Promise((resolve, reject) => {
-                connection.query(queryAll,(err, result) => {
+                connection.query(queryAll, (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
                 })
@@ -164,16 +218,16 @@ class DbService {
 
     async updateProduct(rqBody) {
         try {
-            var {userID, productID, productCount, buyDate} = rqBody;
+            var { userID, productID, productCount, buyDate } = rqBody;
             console.log(`Update receipt information of ${rqBody.userID}`);
             const response = await new Promise((resolve, reject) => {
                 console.log(userID, productID, productCount, buyDate);
                 const query2 = `UPDATE products SET left_amount = left_amount - ${productCount} AND sold_amount = sold_amount + ${productCount} WHERE product_id = ${productID};`
-                connection.query(query2,[],(err, result) => {
+                connection.query(query2, [], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
                 })
-            }); 
+            });
             return response;
         } catch (error) {
             console.log(error);
@@ -328,6 +382,44 @@ class DbService {
         }
     }
 
+    async searchProductByName(name) {
+        try {
+            console.log(`Someone is trying to search for: ${name}`);
+            const response = await new Promise((resolve, reject) => {
+                // const query1 = `INSERT INTO searchhistory VALUES ('${userid}', '${name}', NOW());`;
+                const query2 = `SELECT * FROM products WHERE product_name LIKE '%${name}%';`
+                // const query = query1 + query2;
+                connection.query(query2, (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    // console.log(results);
+                    resolve(results);
+                })
+            });
+
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async saveSearchHistory(searchHis, userID) {
+        try {
+            console.log(`Save ${userID}'s history search: ${searchHis}`);
+            const response = await new Promise((resolve, reject) => {
+                const query1 = `INSERT INTO searchhistory VALUES ('${userID}', '${searchHis}', NOW());`;
+                connection.query(query1, (err, results) => {
+                    if (err) reject(new Error(err.message));
+                    // console.log(results);
+                    resolve(results);
+                })
+            });
+
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     async insertNewName(name) {
         try {
             const dateAdded = new Date();
@@ -396,24 +488,6 @@ class DbService {
                 const query = "SELECT * FROM names WHERE name = ?;";
 
                 connection.query(query, [name], (err, results) => {
-                    if (err) reject(new Error(err.message));
-                    resolve(results);
-                })
-            });
-
-            return response;
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    async searchProductByName(name, userid) {
-        try {
-            const response = await new Promise((resolve, reject) => {
-                const query1 = `INSERT INTO searchhistory VALUES ('${userid}', '${name}');`;
-                const query2 = `SELECT * FROM products WHERE product_name LIKE '%${name}%';`
-                const query = query1 + query2;
-                connection.query(query, (err, results) => {
                     if (err) reject(new Error(err.message));
                     resolve(results);
                 })

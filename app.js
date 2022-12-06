@@ -95,9 +95,12 @@ app.get('/productID/:id', (request, response) => {
 app.get('/user_shop/:shop_name', (request, response) => {
     const { shop_name } = request.params;
     const db = dbService.getDbServiceInstance();
-    // const result = db.getProductInfo(id);
-    see(shop_name);
+    const result = db.getShopInfo(shop_name);
+    result.then(data => response.json({ data }))
+        .catch(err => console.log(err))
 })
+
+
 // Get User Cart Info
 app.get('/userCart/:id', (request, response) => {
     const { id } = request.params;
@@ -128,6 +131,39 @@ app.post('/new-product', (request, response) => {
         .catch(err => console.log(err))
 })
 
+// Get User Order 
+app.get('/userOrder/:userid', (request, response) => {
+    var { userid } = request.params;
+    const db = dbService.getDbServiceInstance();
+    const result = db.getAllUserOrder(userid);
+    result.then(data => {
+        var nonDup = data.reduce((a, b) => {
+            return a.concat([b.order_id]);
+        }, [])
+        data = data.map((a, b) => {
+            var myDate = new Date(a.order_date)
+            a.order_date = `${myDate.getDate()}/${myDate.getMonth() + 1}/${myDate.getFullYear()}`
+            return a;
+        })
+        nonDup = [...new Set(nonDup)];
+        nonDup = nonDup.map(a => {
+            var myFilter = data.filter(b => {
+                return b.order_id == a;
+            })
+            var newData = { orderid: a, orderDate: myFilter[0].order_date, productInfo: [], totalMoney: 0 };
+            myFilter.forEach(ele => {
+                var myObj = { productID: ele.order_id, productAmount: ele.product_amount, price: (parseInt(ele.price * (1 - ele.sale_percent/100) / 1000) * 1000), productName: ele.product_name, img: ele.main_image, category: ele.category };
+                newData.totalMoney += myObj.price * myObj.productAmount;
+                newData.productInfo.push(myObj);
+            })
+            newData.totalMoney = newData.totalMoney.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "đ";
+            return newData;
+        })
+        response.json(nonDup);
+    })
+        .catch(err => console.log(err))
+})
+
 // Buy from cart task:
 // Update cart: delete all cart item
 // Update receipt: create new receipt
@@ -149,13 +185,20 @@ app.get('/addToCart/:productID/:userID/:amount', (request, response) => {
         .catch(err => console.log(err))
 })
 
-
-
 // Update cart item
 app.get('/updateCart/:productID/:userID/:amount', (request, response) => {
     const { productID, userID, amount } = request.params;
     const db = dbService.getDbServiceInstance();
     const result = db.updateCartItem(productID, userID, amount);
+    result.then(data => response.json(data))
+        .catch(err => console.log(err))
+})
+
+// Get user search history
+app.get('/userSearchHistory/:userID', (request, response) => {
+    const { userID } = request.params;
+    const db = dbService.getDbServiceInstance();
+    const result = db.getUserSearchHistory(userID);
     result.then(data => response.json(data))
         .catch(err => console.log(err))
 })
@@ -170,14 +213,24 @@ app.post('/deleteCartItem', (request, response) => {
         .catch(err => console.log(err))
 })
 
-// read
-app.get('/getAll', (request, response) => {
+// Search product by name
+app.get('/searchProduct/:name', (request, response) => {
+    const { name } = request.params;
     const db = dbService.getDbServiceInstance();
+    const result = db.searchProductByName(name);
+    result
+        .then(data => response.json(data))
+        .catch(err => console.log(err));
+})
 
-    const result = db.getAllData();
-
-    result.then(data => response.json({ data: data }))
-        .catch(err => console.log(err))
+// Save search hisotory
+app.get('/saveSearch/:searchHis/:userid', (request, response) => {
+    const { searchHis, userid } = request.params;
+    const db = dbService.getDbServiceInstance();
+    const result = db.saveSearchHistory(searchHis, userid);
+    result
+        .then(data => response.json({ success: true }))
+        .catch(err => console.log(err));
 })
 
 // Test Send file image -> Success
@@ -205,16 +258,6 @@ app.get('/search/:name', (request, response) => {
         .catch(err => console.log(err));
 })
 
-app.get('/searchProduct/:name/:userid', (request, response) => {
-    const { name, userid } = request.params;
-    const db = dbService.getDbServiceInstance();
-    const result = db.searchProductByName(name, userid);
-    result
-        .then(data => response.json(data))
-        .catch(err => console.log(err));
-})
-
-
 /*
     By adding /:id in the link: you will have specific page
     for each product ID
@@ -225,6 +268,17 @@ app.get('/searchProduct/:name/:userid', (request, response) => {
 
 app.listen(process.env.PORT, () => {
     console.log('App is running');
+})
+
+
+// read
+app.get('/getAll', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+
+    const result = db.getAllData();
+
+    result.then(data => response.json({ data: data }))
+        .catch(err => console.log(err))
 })
 
 //update
