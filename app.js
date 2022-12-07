@@ -82,6 +82,16 @@ app.get('/randomProduct/:id', (request, response) => {
         .catch(err => console.log(err))
 })
 
+// Get all product for main page
+app.get('/allProduct', (request, response) => {
+    const { id } = request.params;
+    const db = dbService.getDbServiceInstance();
+    const result = db.getAllProduct();
+
+    result.then(data => response.json({ data }))
+        .catch(err => console.log(err))
+})
+
 // Get productID
 app.get('/productID/:id', (request, response) => {
     const { id } = request.params;
@@ -181,6 +191,14 @@ app.get('/addToCart/:productID/:userID/:amount', (request, response) => {
     const { productID, userID, amount } = request.params;
     const db = dbService.getDbServiceInstance();
     const result = db.addNewProductToCart(productID, userID, amount);
+    result.then(data => response.json(data))
+        .catch(err => console.log(err))
+})
+
+// Get All product category
+app.get('/getCategory', (request, response) => {
+    const db = dbService.getDbServiceInstance();
+    const result = db.getAllCategory();
     result.then(data => response.json(data))
         .catch(err => console.log(err))
 })

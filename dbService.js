@@ -79,6 +79,22 @@ class DbService {
         }
     }
 
+    async getAllProduct(){
+        try {
+            console.log('Getting all product infos for main page');
+            const response = await new Promise((resolve, reject) => {
+                const query = `SELECT * FROM shopee_database.products ORDER BY RAND()`;
+                connection.query(query, (err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     async getProductInfo(amount) {
         try {
             console.log(`Getting product information with id ${amount}`);
@@ -272,6 +288,21 @@ class DbService {
                 console.log('Trying to log in !!');
                 const query = "SELECT user_name, password FROM users WHERE user_name = ? AND password = ?"
                 connection.query(query, [usernameLogIn, passwordLogIn], (err, result) => {
+                    if (err) reject(new Error(err.message))
+                    resolve(result);
+                })
+            });
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getAllCategory() {
+        try {
+            const response = await new Promise((resolve, reject) => {
+                const query = "SELECT category FROM products GROUP BY category;"
+                connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
                 })
