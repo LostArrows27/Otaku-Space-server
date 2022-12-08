@@ -284,8 +284,10 @@ app.get('/search/:name', (request, response) => {
 //     response.sendFile(__dirname + "/index.html")
 // })
 
-app.listen(process.env.PORT, () => {
-    console.log('App is running');
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log('App is running on ' + PORT);
 })
 
 
