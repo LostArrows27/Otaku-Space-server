@@ -49,7 +49,7 @@ class DbService {
         try {
             const response = await new Promise((resolve, reject) => {
                 var arrImage = Object.values(image);
-                const query = `INSERT INTO shopee_database.products
+                const query = `INSERT INTO products
                 (product_name, owner_name,sale_percent,price,left_amount,sold_amount,category,liked_count,main_image,sub_image1,sub_image2,sub_image3,sub_image4)
                 VALUES (? , ?, ?, ?, ?, 0, ?, 0, ?, ?, ?, ?, ?); SELECT  LAST_INSERT_ID() AS id, sale_percent FROM products WHERE product_id = LAST_INSERT_ID()`
                 connection.query(query, [productName, ownerName, productSale, productPrice, productFigure, productCategory, ...arrImage], (err, result) => {
@@ -67,7 +67,7 @@ class DbService {
         try {
             console.log('Getting ' + amount + ' random products');
             const response = await new Promise((resolve, reject) => {
-                const query = `SELECT * FROM shopee_database.products ORDER BY RAND() LIMIT ${amount}`;
+                const query = `SELECT * FROM products ORDER BY RAND() LIMIT ${amount}`;
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -83,7 +83,7 @@ class DbService {
         try {
             console.log('Getting all product infos for main page');
             const response = await new Promise((resolve, reject) => {
-                const query = `SELECT * FROM shopee_database.products ORDER BY RAND()`;
+                const query = `SELECT * FROM products ORDER BY RAND()`;
                 connection.query(query, (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -139,7 +139,7 @@ class DbService {
         try {
             console.log(`Getting user ${userID}'s search history`);
             const response = await new Promise((resolve, reject) => {
-                const query = `SELECT search_history FROM searchhistory WHERE user_id = ?`;
+                const query = `SELECT search_history FROM searchhistory WHERE user_id = ? ORDER BY search_date;`;
                 connection.query(query, [userID], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -157,7 +157,7 @@ class DbService {
 
             const response = await new Promise((resolve, reject) => {
                 const query = `SELECT u.user_nickName,u.image_profile,(SELECT SUM(p.sold_amount) FROM products p WHERE p.owner_name = ? ) as sold_amount FROM users u WHERE u.user_name = ?;
-                SELECT p.* FROM shopee_database.products p WHERE p.owner_name = ? AND p.product_name IS NOT NULL;`;
+                SELECT p.* FROM products p WHERE p.owner_name = ? AND p.product_name IS NOT NULL;`;
                 connection.query(query, [shop_name, shop_name, shop_name], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -194,7 +194,7 @@ class DbService {
             console.log(`Update receipt information of ${rqBody.userID}`);
             const response = await new Promise((resolve, reject) => {
                 // console.log(userID, productID, productCount, buyDate);
-                const query = `UPDATE products SET left_amount = left_amount - ?, sold_amount = sold_amount + ? WHERE product_id = ?;INSERT INTO orders (order_customer_id, order_date) VALUES (?, ?);INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),?,?);`
+                const query = `UPDATE products SET left_amount = left_amount - ?, sold_amount = sold_amount + ? WHERE product_id = ?;INSERT INTO orders (order_customer_id, order_date) VALUES (?, ?);INSERT INTO purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),?,?);`
                 connection.query(query, [productCount, productCount, productID, userID, buyDate, productID, productCount], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -215,7 +215,7 @@ class DbService {
             const query2 = `INSERT INTO orders (order_customer_id, order_date) VALUES ("${userID}", NOW());`
             const query3 = productArr.reduce((acc, info) => {
                 var sub_query_main = `UPDATE products SET left_amount = left_amount - ${info.amount}, sold_amount = sold_amount + ${info.amount} WHERE product_id = ${info.productID};`
-                var sub_query = `INSERT INTO shopee_database.purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),${info.productID}, ${info.amount});`
+                var sub_query = `INSERT INTO purchase (order_id,product_id, product_amount) VALUES(LAST_INSERT_ID(),${info.productID}, ${info.amount});`
                 return acc + sub_query_main + sub_query;
             }, '');
             const queryAll = query1 + query2 + query3;
@@ -264,7 +264,7 @@ class DbService {
                     })
                     if (!hasExist) {
                         console.log(`Sign-up success: ${username} - ${password}`);
-                        const query = "INSERT INTO `shopee_database`.`users` (`user_name`,`password`,`user_nickName`,`dob`, `image_profile`) VALUES (?, ?, ?, ?, ?);"
+                        const query = "INSERT INTO `users` (`user_name`,`password`,`user_nickName`,`dob`, `image_profile`) VALUES (?, ?, ?, ?, ?);"
                         connection.query(query, [username, password, fullname, dob, img], (err, result) => {
                             if (err) reject(new Error(err.message))
                             resolve(result);
@@ -333,7 +333,7 @@ class DbService {
         try {
             console.log('Add new product to cart');
             const response = await new Promise((resolve, reject) => {
-                const query = "INSERT INTO `shopee_database`.`carts` (`cart_user_id`,`product_id`,`product_amount`)VALUES (?, ?, ?);"
+                const query = "INSERT INTO `carts` (`cart_user_id`,`product_id`,`product_amount`)VALUES (?, ?, ?);"
                 connection.query(query, [userID, productID, amount], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -349,7 +349,7 @@ class DbService {
         try {
             console.log('Update cart item');
             const response = await new Promise((resolve, reject) => {
-                const query = "UPDATE `shopee_database`.`carts` SET product_amount = product_amount + ? WHERE cart_user_id = ? AND product_id = ?;"
+                const query = "UPDATE `carts` SET product_amount = product_amount + ? WHERE cart_user_id = ? AND product_id = ?;"
                 connection.query(query, [amount, userID, productID], (err, result) => {
                     if (err) reject(new Error(err.message))
                     resolve(result);
@@ -383,7 +383,7 @@ class DbService {
             console.log('Delete cart item !!');
             var { user_id, product_id } = rqBody;
             const response = await new Promise((resolve, reject) => {
-                const query = "DELETE FROM `shopee_database`.`carts` WHERE cart_user_id = ? AND product_id = ?;"
+                const query = "DELETE FROM `carts` WHERE cart_user_id = ? AND product_id = ?;"
                 connection.query(query, [user_id, product_id], (err, result) => {
                     if (err) reject(new Error(err.message))
                     // console.log(result);
@@ -440,7 +440,7 @@ class DbService {
                 const query1 = `INSERT INTO searchhistory VALUES ('${userID}', '${searchHis}', NOW());`;
                 connection.query(query1, (err, results) => {
                     if (err) reject(new Error(err.message));
-                    // console.log(results);
+                    console.log(results);
                     resolve(results);
                 })
             });
