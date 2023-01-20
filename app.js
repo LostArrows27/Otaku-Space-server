@@ -12,6 +12,12 @@ app.use(express.json()); // send JSON in data format
 
 app.use(express.urlencoded({ extended: false }));
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 // create 
 app.post('/insert', (request, response) => {
     const { name } = request.body;
@@ -162,7 +168,7 @@ app.get('/userOrder/:userid', (request, response) => {
             })
             var newData = { orderid: a, orderDate: myFilter[0].order_date, productInfo: [], totalMoney: 0 };
             myFilter.forEach(ele => {
-                var myObj = { productID: ele.order_id, productAmount: ele.product_amount, price: (parseInt(ele.price * (1 - ele.sale_percent/100) / 1000) * 1000), productName: ele.product_name, img: ele.main_image, category: ele.category };
+                var myObj = { productID: ele.order_id, productAmount: ele.product_amount, price: (parseInt(ele.price * (1 - ele.sale_percent / 100) / 1000) * 1000), productName: ele.product_name, img: ele.main_image, category: ele.category };
                 newData.totalMoney += myObj.price * myObj.productAmount;
                 newData.productInfo.push(myObj);
             })
