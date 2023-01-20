@@ -7,11 +7,11 @@ dotenv.config();
 const dbService = require('./dbService'); // connect with database 
 const { request, response } = require('express');
 
+// app.use(cors());
 app.use(express.json()); // send JSON in data format
 
 app.use(express.urlencoded({ extended: false }));
 
-//cors
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
