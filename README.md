@@ -5,5 +5,8 @@
 
 ## Database Diagram
 
-- Database is made with MySQL with these 6 relational table
+- Database is made with MySQL with these 6 relational tables
+- Hosting on [Heroku](https://www.heroku.com)
+
+
 ![image](https://user-images.githubusercontent.com/97510841/207873522-0e267a18-b3bb-4599-8631-948a7bc970d6.png)
